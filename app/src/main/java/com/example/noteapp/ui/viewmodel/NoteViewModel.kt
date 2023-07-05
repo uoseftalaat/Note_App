@@ -1,6 +1,5 @@
 package com.example.noteapp.ui.viewmodel
 
-import androidx.compose.ui.platform.isDebugInspectorInfoEnabled
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteapp.other.SortingTypes
@@ -8,6 +7,7 @@ import com.example.noteapp.room.Note
 import com.example.noteapp.room.NoteDao
 import com.example.noteapp.room.NoteEvent
 import com.example.noteapp.room.NoteState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,9 +16,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class NoteViewModel(
+@HiltViewModel
+class NoteViewModel @Inject constructor(
     private val dao: NoteDao
 ):ViewModel() {
     private val _state = MutableStateFlow(NoteState())
@@ -36,7 +39,6 @@ class NoteViewModel(
             Noteslist = notes
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NoteState())
-
     fun onEvent(event: NoteEvent){
         when(event){
             is NoteEvent.DeleteNote -> {

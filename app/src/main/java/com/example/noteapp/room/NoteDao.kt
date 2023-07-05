@@ -18,10 +18,10 @@ interface NoteDao {
     suspend fun deleteNote(note: Note)
 
     @Query("SELECT * FROM note ORDER BY id ASC")
-    fun getNotesByTime(): Flow<List<Note>>
+    suspend fun getNotesByTime(): Flow<List<Note>>
 
     @Query("SELECT * FROM note ORDER BY title ASC")
-    fun getNotesByTitle(): Flow<List<Note>>
+    suspend fun getNotesByTitle(): Flow<List<Note>>
 
 
 
