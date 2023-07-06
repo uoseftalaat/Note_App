@@ -7,7 +7,29 @@
     tools:context=".ui.MainActivity"
     android:background="@drawable/screen">
 
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="horizontal"
+        android:id="@+id/radioGroup"
+        >
 
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sort By Title"
+            android:id="@+id/sort_by_title"></RadioButton>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sort By Time"
+            android:id="@+id/sort_by_time"></RadioButton>
+    </RadioGroup>
     <ImageView
         android:id="@+id/add_Button"
         android:layout_width="59dp"

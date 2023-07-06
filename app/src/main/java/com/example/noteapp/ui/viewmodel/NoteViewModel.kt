@@ -20,11 +20,8 @@ class NoteViewModel(
     var _notes = MutableLiveData<MutableList<Note>>()
     val notes:LiveData<MutableList<Note>>
         get() = _notes
-
     init{
-        viewModelScope.launch {
-            getNotesByTime()
-        }
+        getNotesByTime()
     }
     fun deleteNote(note: Note){
         var data:MutableList<Note> = (_notes.value?.toMutableList() ?: emptyList()) as MutableList<Note>
@@ -35,8 +32,9 @@ class NoteViewModel(
         }
     }
     fun addNote(note:Note){
-        var data:MutableList<Note> = (_notes.value?.toMutableList() ?: emptyList()) as MutableList<Note>
-        data.add(note)
+
+        var data:MutableList<Note> = mutableListOf(note)
+        data += _notes.value?.toMutableList() ?: emptyList()
         _notes.value = data
         viewModelScope.launch {
             dao.UpsertNote(note)
@@ -49,12 +47,10 @@ class NoteViewModel(
         }
     }
 
-    fun getNotesByTitle(): List<Note> {
-        var notes :List<Note> = emptyList()
+    fun getNotesByTitle(){
         viewModelScope.launch {
-            notes = dao.getNotesByTitle()
+            _notes.postValue(dao.getNotesByTitle().toMutableList())
         }
-        return notes
     }
 
 }

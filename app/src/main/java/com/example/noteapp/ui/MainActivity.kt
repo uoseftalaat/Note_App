@@ -1,16 +1,11 @@
 package com.example.noteapp.ui
 
-import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +17,6 @@ import com.example.noteapp.other.Constant.TABLE_NAME
 import com.example.noteapp.room.Note
 import com.example.noteapp.room.NoteDatabase
 import com.example.noteapp.ui.viewmodel.NoteViewModel
-import java.util.zip.Inflater
 
 
 class MainActivity : AppCompatActivity() {
@@ -46,8 +40,6 @@ class MainActivity : AppCompatActivity() {
             NoteDatabase::class.java,
             TABLE_NAME
         ).build()
-        val notes: MutableLiveData<MutableList<Note>> = MutableLiveData(mutableListOf(Note(title = "do", Details = "this")))
-        val size = viewModel.notes.value?.size
         viewModel.notes.observe(this) { it ->
             adapter = NoteAdapter(it, viewModel)
             binding.recyclerView.adapter = adapter
@@ -56,23 +48,38 @@ class MainActivity : AppCompatActivity() {
         binding.addButton.setOnClickListener{
             addNoteDialog(this).show()
         }
+        binding.radioGroup.setOnCheckedChangeListener { group, checkedId ->
+            when (checkedId) {
+                R.id.sort_by_title -> {
+                    viewModel.getNotesByTitle()
+                }
+                R.id.sort_by_time -> {
+                    viewModel.getNotesByTime()
+                }
+            }
+        }
     }
 
     fun addNoteDialog(context: Context): AlertDialog {
-        val binding = DialogBinding.inflate(LayoutInflater.from(context))
+        val bind= DialogBinding.inflate(LayoutInflater.from(context))
         val noteDialog = AlertDialog.Builder(context)
             .setTitle("Add new Note")
-            .setView(binding.root)
+            .setView(bind.root)
             .setNegativeButton("Cancel") { _, _ -> }
             .setPositiveButton("Add") { _, _ ->
                 viewModel.addNote(Note(
-                    title = binding.addTitle.text.toString(),
-                    Details = binding.addDetails.text.toString()
+                    title = bind.addTitle.text.toString(),
+                    Details = bind.addDetails.text.toString()
                 ))
+                if(binding.radioGroup.checkedRadioButtonId == R.id.sort_by_title){
+                    viewModel.getNotesByTitle()
+                }
+                else{
+                    viewModel.getNotesByTime()
+                }
             }
             .create()
         return noteDialog
     }
-
 
 }
