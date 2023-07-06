@@ -1,27 +1,27 @@
 package com.example.noteapp.room
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
-import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
 
-    @Upsert
+    @Insert
     suspend fun UpsertNote(note: Note)
 
     @Delete
     suspend fun deleteNote(note: Note)
 
     @Query("SELECT * FROM note ORDER BY id ASC")
-    suspend fun getNotesByTime(): Flow<List<Note>>
+    suspend fun getNotesByTime(): List<Note>
 
     @Query("SELECT * FROM note ORDER BY title ASC")
-    suspend fun getNotesByTitle(): Flow<List<Note>>
+    suspend fun getNotesByTitle(): List<Note>
 
 
 

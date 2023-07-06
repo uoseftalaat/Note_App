@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="20dp">
+
+
+    <EditText
+        android:id="@+id/add_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:hint="Add your Note Title"
+        android:textAlignment="center"
+        android:textSize="25dp"
+        ></EditText>
+    <EditText
+        android:id="@+id/add_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:hint="Add your Note Details"
+        android:textSize="25dp"
+        android:textAlignment="center"
+        android:layout_below="@id/add_title"
+        ></EditText>
+
+
+
+</RelativeLayout>

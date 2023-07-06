@@ -1,90 +1,60 @@
 package com.example.noteapp.ui.viewmodel
 
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.noteapp.other.SortingTypes
 import com.example.noteapp.room.Note
 import com.example.noteapp.room.NoteDao
-import com.example.noteapp.room.NoteEvent
-import com.example.noteapp.room.NoteState
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class NoteViewModel @Inject constructor(
+
+class NoteViewModel(
     private val dao: NoteDao
 ):ViewModel() {
-    private val _state = MutableStateFlow(NoteState())
-    private val _sorttype = MutableStateFlow(SortingTypes.SORT_BY_TIME)
-    private val _notes = _sorttype.flatMapLatest {sortType ->
-        when(sortType){
-            SortingTypes.SORT_BY_TITLE -> dao.getNotesByTitle()
-            SortingTypes.SORT_BY_TIME -> dao.getNotesByTime()
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+    var _notes = MutableLiveData<MutableList<Note>>()
+    val notes:LiveData<MutableList<Note>>
+        get() = _notes
 
-    val state = combine(_state, _sorttype,_notes){state , sorttype , notes ->
-        state.copy(
-            sortType = sorttype,
-            Noteslist = notes
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NoteState())
-    fun onEvent(event: NoteEvent){
-        when(event){
-            is NoteEvent.DeleteNote -> {
-                viewModelScope.launch {
-                    dao.deleteNote(event.note)
-                }
-            }
-            NoteEvent.HideDialog -> _state.update {
-                it.copy(
-                    isAddingNewNote = false
-                )
-            }
-            NoteEvent.SaveContent -> {
-                val title = state.value.title
-                val details = state.value.details
-                if(title.isBlank() || details.isBlank()){
-                    return
-                }
-                val newNote = Note(title = title , Details = details)
-                viewModelScope.launch {
-                    dao.UpsertNote(newNote)
-                }
-                _state.update {
-                    it.copy(
-                        isAddingNewNote = false,
-                        title = "" ,
-                        details = ""
-                    )
-                }
-            }
-            is NoteEvent.SetDetails -> _state.update {
-                it.copy(
-                    details = event.Details
-                )
-            }
-            is NoteEvent.SetTitle -> _state.update {
-                it.copy(
-                    title = event.title
-                )
-            }
-            NoteEvent.ShowDialog -> _state.update {
-                it.copy(
-                    isAddingNewNote = true
-                )
-            }
-            is NoteEvent.SortNotes -> _sorttype.value = event.sortType
+    init{
+        viewModelScope.launch {
+            getNotesByTime()
         }
     }
+    fun deleteNote(note: Note){
+        var data:MutableList<Note> = (_notes.value?.toMutableList() ?: emptyList()) as MutableList<Note>
+        data.remove(note)
+        _notes.value = data
+        viewModelScope.launch {
+            dao.deleteNote(note)
+        }
+    }
+    fun addNote(note:Note){
+        var data:MutableList<Note> = (_notes.value?.toMutableList() ?: emptyList()) as MutableList<Note>
+        data.add(note)
+        _notes.value = data
+        viewModelScope.launch {
+            dao.UpsertNote(note)
+        }
+    }
+
+    fun getNotesByTime() {
+        viewModelScope.launch {
+            _notes.postValue(dao.getNotesByTime().toMutableList())
+        }
+    }
+
+    fun getNotesByTitle(): List<Note> {
+        var notes :List<Note> = emptyList()
+        viewModelScope.launch {
+            notes = dao.getNotesByTitle()
+        }
+        return notes
+    }
+
 }
