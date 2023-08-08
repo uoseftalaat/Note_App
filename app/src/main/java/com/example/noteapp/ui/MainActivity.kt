@@ -35,29 +35,36 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        db = Room.databaseBuilder(
-            applicationContext,
-            NoteDatabase::class.java,
-            TABLE_NAME
-        ).build()
+        createDatabase()
         viewModel.notes.observe(this) { it ->
             adapter = NoteAdapter(it, viewModel)
             binding.recyclerView.adapter = adapter
             binding.recyclerView.layoutManager = LinearLayoutManager(this)
         }
-        binding.addButton.setOnClickListener{
-            addNoteDialog(this).show()
-        }
-        binding.radioGroup.setOnCheckedChangeListener { group, checkedId ->
-            when (checkedId) {
-                R.id.sort_by_title -> {
-                    viewModel.getNotesByTitle()
-                }
-                R.id.sort_by_time -> {
-                    viewModel.getNotesByTime()
+        binding.apply {
+            addButton.setOnClickListener {
+                addNoteDialog(this@MainActivity).show()
+            }
+            radioGroup.setOnCheckedChangeListener { group, checkedId ->
+                when (checkedId) {
+                    R.id.sort_by_title -> {
+                        viewModel.getNotesByTitle()
+                    }
+
+                    R.id.sort_by_time -> {
+                        viewModel.getNotesByTime()
+                    }
                 }
             }
         }
+    }
+
+    fun createDatabase(){
+        db = Room.databaseBuilder(
+            applicationContext,
+            NoteDatabase::class.java,
+            TABLE_NAME
+        ).build()
     }
 
     fun addNoteDialog(context: Context): AlertDialog {
